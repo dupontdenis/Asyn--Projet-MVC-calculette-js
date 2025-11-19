@@ -1,37 +1,46 @@
 /**
+ * helpers.js
+ * -----------
+ * Small DOM utility helpers used by the View to keep code small and testable.
+ * These helpers are intentionally minimal and do not depend on external libs.
+ */
+
+/**
  * querySelector wrapper
- *
  * @param {string} selector Selector to query
  * @param {Element} [scope] Optional scope element for the selector
+ * @returns {Element|null} The first element matching the selector
  */
- export function qs(selector, scope) {
-	return (scope || document).querySelector(selector);
+export function qs(selector, scope) {
+  return (scope || document).querySelector(selector);
 }
 
 /**
  * querySelectorAll wrapper
- *
  * @param {string} selector Selector to query
  * @param {Element} [scope] Optional scope element for the selector
+ * @returns {NodeListOf<Element>} All matching elements
  */
- export function qsa(selector, scope) {
-	return (scope || document).querySelectorAll(selector);
+export function qsa(selector, scope) {
+  return (scope || document).querySelectorAll(selector);
 }
 
 /**
  * addEventListener wrapper
- *
  * @param {Element|Window} target Target Element
  * @param {string} type Event name to bind to
  * @param {Function} callback Event callback
  * @param {boolean} [capture] Capture the event
  */
 export function $on(target, type, callback, capture) {
-	target.addEventListener(type, callback, !!capture)
+  target.addEventListener(type, callback, !!capture);
 }
 
 /**
  * Attach a handler to an event for all elements matching a selector.
+ * Uses event delegation: a single listener on `target` handles events from
+ * children that match `selector`. This is efficient and works well with
+ * dynamically created buttons.
  *
  * @param {Element} target Element which the event must bubble to
  * @param {string} selector Selector to match
@@ -40,19 +49,19 @@ export function $on(target, type, callback, capture) {
  *                           from an element matching selector
  * @param {boolean} [capture] Capture the event
  */
- export function $delegate(target, selector, type, handler, capture) {
-	const dispatchEvent = event => {
-		const targetElement = event.target;
-		const potentialElements = target.querySelectorAll(selector);
-		let i = potentialElements.length;
+export function $delegate(target, selector, type, handler, capture) {
+  const dispatchEvent = (event) => {
+    const targetElement = event.target;
+    const potentialElements = target.querySelectorAll(selector);
+    let i = potentialElements.length;
 
-		while (i--) {
-			if (potentialElements[i] === targetElement) {
-				handler.call(targetElement, event);
-				break;
-			}
-		}
-	};
+    while (i--) {
+      if (potentialElements[i] === targetElement) {
+        handler.call(targetElement, event);
+        break;
+      }
+    }
+  };
 
-	$on(target, type, dispatchEvent, !!capture);
+  $on(target, type, dispatchEvent, !!capture);
 }
